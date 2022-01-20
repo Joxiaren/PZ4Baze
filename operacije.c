@@ -51,12 +51,6 @@ SLOG* pronadjiSlog(FILE* fajl, int sifraLeta)
 }
 void dodajSlog(FILE* fajl, SLOG* slog)
 {
-    if(fajl == NULL)
-    {
-        printf("Fajl nije otvoren\n");
-        return;
-    }
-
     SLOG* exists = pronadjiSlog(fajl, slog->sifraLeta);
     if(exists != NULL)
     {
@@ -130,8 +124,6 @@ void ispisiSveSlogove(FILE* fajl)
 }
 void ispisiSlog(SLOG* slog)
 {
-
-    
     printf("%08d %04d-%02d-%02d %02d:%02d %7s %03d %04d %21s",
         slog->sifraLeta,
         slog->datum.year,
@@ -143,6 +135,10 @@ void ispisiSlog(SLOG* slog)
         slog->trajanjeLeta,
         slog->udaljenostLeta,
         slog->mestoDolaska);
+}
+void ispisiHeader()
+{
+    printf("%8s %16s %7s %3s %4s %21s\n", "SifraL", "Datum", "TipAvio", "Trj", "Udlj", "MestoDolaska");
 }
 void obrisiSlogFizicki(FILE* fajl, int sifraLeta)
 {
@@ -226,7 +222,7 @@ void ispisBrzAvion(FILE* fajl)
             else break;
         }
     }
-    printf("Najbrzi avion je: %s sa brzinom od %lf Km/h\n", avionTip, brzina*60);
+    printf("Najbrzi avion je: %s sa brzinom od %.2lf Km/h\n", avionTip, brzina*60);
 }
 void dodavanjeZvezdice(FILE* fajl)
 {
@@ -242,7 +238,7 @@ void dodavanjeZvezdice(FILE* fajl)
             if(blok.slogovi[j].sifraLeta == OZNAKA_KRAJA_DATOTEKE) break;
 			DATETIME dt;
             memcpy(&dt, &blok.slogovi[j].datum, sizeof(DATETIME));
-            //TODO Optimize
+
             if(blok.slogovi[j].datum.year == 2021 && nextYear(&dt, blok.slogovi[j].trajanjeLeta))
 			{
 				addStar(blok.slogovi[j].mestoDolaska);
@@ -280,17 +276,25 @@ void ispisVrstaPoMestu(FILE* fajl)
             }
         }
     }
+
     while(head != NULL)
     {
+        MESTA* nextM;
         printf("\nTipovi aviona koji su sleteli u %s:\n", head->mestoDolaska);
         TIPOVI* t = head->tipovi;
+        TIPOVI* nextT;
         while(t != NULL)
         {
             printf("%s, ", t->tipAviona);
-            t = t->nextTip;
+            nextT = t->nextTip;
+            free(t);
+            t = nextT;
         }
-        head = head->nextMesto;
+        nextM = head->nextMesto;
+        free(head);
+        head = nextM;
     }
+    printf("\n");
     return;
 }
 
@@ -303,7 +307,6 @@ bool leapYear(int year)
 }
 bool nextYear(DATETIME* dateTime, int minutes)
 {
-    //TODO Optimize
     dateTime->minute += minutes;
     dateTime->hour += (dateTime->minute / 60);
     dateTime->day += (dateTime->hour / 24);
@@ -326,22 +329,33 @@ void addStar(char* s)
     s[j] = '*';
     s[j+1] = '\0';
 }
+
 MESTA* findMesto(MESTA* head, char* mesto)
 {
+    char comparer[21];
+    strcpy(comparer, mesto);
+    int length  = strlen(comparer);
+    if(comparer[length-1] == '*') comparer[length-1] = '\0';
+
     MESTA* locator = head;
     while(locator != NULL)
     {
-        if(!strcmp(locator->mestoDolaska, mesto)) return locator;
+        if(!strcmp(locator->mestoDolaska, comparer)) return locator;
         locator = locator->nextMesto;
     }
     return locator;
 }
 MESTA* addMesto(MESTA** head, char* mesto)
 {
+    char adder[21];
+    strcpy(adder, mesto);
+    int length = strlen(adder);
+    if(adder[length-1] == '*') adder[length-1] = '\0';
+
     MESTA* novoMesto = (MESTA*)malloc(sizeof(MESTA));
     novoMesto->nextMesto=NULL;
     novoMesto->tipovi=NULL;
-    strcpy(novoMesto->mestoDolaska, mesto);
+    strcpy(novoMesto->mestoDolaska, adder);
 
     MESTA* last = *head;
 

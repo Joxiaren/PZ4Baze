@@ -22,6 +22,7 @@ SLOG* pronadjiSlog(FILE *fajl, int sifraLeta);
 void dodajSlog(FILE *fajl, SLOG *slog);
 void ispisiSveSlogove(FILE *fajl);
 void ispisiSlog(SLOG* slog);
+void ispisiHeader();
 void obrisiSlogFizicki(FILE *fajl, int sifraLeta);
 void ispisBrzAvion(FILE* fajl);
 void dodavanjeZvezdice(FILE* fajl);

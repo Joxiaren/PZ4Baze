@@ -22,13 +22,16 @@ int main()
     {
         printf("Odaberite opciju:\n");
         printf("1 - Otvori datoteku\n");
-        printf("2 - Pretrazi datoteku\n");
-        printf("3 - Dodaj slog\n");
-        printf("4 - Ispisi sve slogove\n");
-        printf("5 - (fizicki) Izbrisi slog\n");
-        printf("6 - Ispis aviona sa najvecom brzinom\n");
-        printf("7 - Dodavanje '*' na letove koji prelaze godinu\n");
-        printf("8 - Prikaz razlicitih aviona za svako mesto dolaska\n");
+        if(fajl != NULL)
+        {
+            printf("2 - Pretrazi datoteku\n");
+            printf("3 - Dodaj slog\n");
+            printf("4 - Ispisi sve slogove\n");
+            printf("5 - (fizicki) Izbrisi slog\n");
+            printf("6 - Ispis aviona sa najvecom brzinom\n");
+            printf("7 - Dodavanje '*' na letove koji prelaze godinu\n");
+            printf("8 - Prikaz razlicitih aviona za svako mesto dolaska\n");
+        }
         printf("0 - Izlaz\n");
         if(fajl == NULL) printf("!!!! Fajl nije otvoren !!!!\n");
 
@@ -49,7 +52,7 @@ int main()
             fajl = otvoriDatoteku(fileName);
             printf("\n");
         }
-        else if(userInput == 2)
+        else if(userInput == 2 && fajl != NULL)
         {
             int sifraLeta;
             printf("Unesite sifru leta za pretragu: ");
@@ -59,15 +62,16 @@ int main()
             SLOG* slog = pronadjiSlog(fajl, sifraLeta);
             if(slog != NULL)
             {
-                printf("ev ga slog\n");
+                printf("Slog je pronadjen:\n");
+                ispisiHeader();
                 ispisiSlog(slog);
                 printf("\n");
             }
             else printf("Dati slog nije pronadjen\n");
         }
-        else if(userInput == 3)
+        else if(userInput == 3 && fajl != NULL)
         {
-            //TODO Provjera Unosa
+            //TODO: Provjera Unosa
             SLOG slog;
             printf("Unesite sifru leta: ");
             scanf("%d", &slog.sifraLeta);
@@ -97,17 +101,17 @@ int main()
             printf("Unesite mesto dolaska (20 char max)");
             scanf("%s", slog.mestoDolaska);
 
-            ispisiSlog(&slog);
-            printf("\n");
+            //ispisiSlog(&slog);
+            //printf("\n");
             dodajSlog(fajl, &slog);
             printf("\n");
         }
-        else if(userInput == 4)
+        else if(userInput == 4 && fajl != NULL)
         {
             ispisiSveSlogove(fajl);
             printf("\n");
         }
-        else if(userInput == 5)
+        else if(userInput == 5 && fajl != NULL)
         {
             int sifraLeta;
             printf("Unesite sifru leta za brisanje: ");
@@ -116,9 +120,9 @@ int main()
             obrisiSlogFizicki(fajl, sifraLeta);
             printf("\n");
         }
-        else if(userInput == 6) ispisBrzAvion(fajl);
-        else if(userInput == 7) dodavanjeZvezdice(fajl);
-        else if(userInput == 8) ispisVrstaPoMestu(fajl);
+        else if(userInput == 6 && fajl != NULL) ispisBrzAvion(fajl);
+        else if(userInput == 7 && fajl != NULL) dodavanjeZvezdice(fajl);
+        else if(userInput == 8 && fajl != NULL) ispisVrstaPoMestu(fajl);
         else
         {
             printf("Los input!!\n");
