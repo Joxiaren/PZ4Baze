@@ -22,3 +22,16 @@ typedef struct Blok {
     SLOG slogovi[FBLOKIRANJA];
 } BLOK;
 
+typedef struct tipovi{
+    char tipAviona[7];
+    struct tipovi* nextTip;
+} TIPOVI;
+
+typedef struct mesta {
+    char mestoDolaska[21];
+    TIPOVI* tipovi;
+    struct mesta* nextMesto;
+} MESTA;
+
+
+

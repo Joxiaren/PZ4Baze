@@ -258,6 +258,42 @@ void dodavanjeZvezdice(FILE* fajl)
     }
     printf("Pronadjeno je %d leta koji prelaze iz 2021. u 2022. godinu\n", count);
 }
+void ispisVrstaPoMestu(FILE* fajl)
+{
+    MESTA* head = NULL;
+    BLOK blok;
+    fseek(fajl, 0, SEEK_SET);
+    while(fread(&blok, sizeof(BLOK), 1, fajl))
+    {
+        int j;
+        for(j = 0; j < FBLOKIRANJA; j++)
+        {
+            if(blok.slogovi[j].sifraLeta == OZNAKA_KRAJA_DATOTEKE) break;
+            MESTA* mesto = NULL;
+            if((mesto = findMesto(head, blok.slogovi[j].mestoDolaska)) == NULL)
+            {
+                mesto = addMesto(&head, blok.slogovi[j].mestoDolaska);
+            }
+            if(findTip(mesto->tipovi, blok.slogovi[j].tipAviona) == NULL) 
+            {
+                addTip(&(mesto->tipovi), blok.slogovi[j].tipAviona);
+            }
+        }
+    }
+    while(head != NULL)
+    {
+        printf("\nTipovi aviona koji su sleteli u %s:\n", head->mestoDolaska);
+        TIPOVI* t = head->tipovi;
+        while(t != NULL)
+        {
+            printf("%s, ", t->tipAviona);
+            t = t->nextTip;
+        }
+        head = head->nextMesto;
+    }
+    return;
+}
+
 bool leapYear(int year)
 {
     if(year % 400 == 0) return true;
@@ -265,7 +301,6 @@ bool leapYear(int year)
     if(year % 4 == 0) return true;
     return false;
 }
-
 bool nextYear(DATETIME* dateTime, int minutes)
 {
     //TODO Optimize
@@ -291,3 +326,59 @@ void addStar(char* s)
     s[j] = '*';
     s[j+1] = '\0';
 }
+MESTA* findMesto(MESTA* head, char* mesto)
+{
+    MESTA* locator = head;
+    while(locator != NULL)
+    {
+        if(!strcmp(locator->mestoDolaska, mesto)) return locator;
+        locator = locator->nextMesto;
+    }
+    return locator;
+}
+MESTA* addMesto(MESTA** head, char* mesto)
+{
+    MESTA* novoMesto = (MESTA*)malloc(sizeof(MESTA));
+    novoMesto->nextMesto=NULL;
+    novoMesto->tipovi=NULL;
+    strcpy(novoMesto->mestoDolaska, mesto);
+
+    MESTA* last = *head;
+
+    if(*head == NULL)
+    {
+        *head = novoMesto;
+        return *head;
+    }
+    while(last->nextMesto != NULL) last = last->nextMesto;
+    last->nextMesto = novoMesto;
+    return last->nextMesto;
+}
+TIPOVI* findTip(TIPOVI* head, char* tip)
+{
+    TIPOVI* locator = head;
+    while(locator != NULL)
+    {
+        if(!strcmp(locator->tipAviona, tip)) return locator;
+        locator = locator->nextTip;
+    }
+    return locator;
+}
+TIPOVI* addTip(TIPOVI** head, char* tip)
+{
+    TIPOVI* noviTip = (TIPOVI*) malloc(sizeof(TIPOVI));
+    noviTip->nextTip = NULL;
+    strcpy(noviTip->tipAviona, tip);
+
+    TIPOVI* last = *head;
+
+    if(*head == NULL)
+    {
+        *head = noviTip;
+        return *head;
+    }
+    while(last->nextTip != NULL) last = last->nextTip;
+    last->nextTip = noviTip;
+    return last->nextTip;
+}
+

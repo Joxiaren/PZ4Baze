@@ -67,6 +67,7 @@ int main()
         }
         else if(userInput == 3)
         {
+            //TODO Provjera Unosa
             SLOG slog;
             printf("Unesite sifru leta: ");
             scanf("%d", &slog.sifraLeta);
@@ -117,10 +118,7 @@ int main()
         }
         else if(userInput == 6) ispisBrzAvion(fajl);
         else if(userInput == 7) dodavanjeZvezdice(fajl);
-        else if(userInput == 8)
-        {
-
-        }
+        else if(userInput == 8) ispisVrstaPoMestu(fajl);
         else
         {
             printf("Los input!!\n");
