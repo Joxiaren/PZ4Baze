@@ -116,10 +116,7 @@ int main()
             printf("\n");
         }
         else if(userInput == 6) ispisBrzAvion(fajl);
-        else if(userInput == 7)
-        {
-
-        }
+        else if(userInput == 7) dodavanjeZvezdice(fajl);
         else if(userInput == 8)
         {
 

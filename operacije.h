@@ -9,6 +9,10 @@
 #include <sys/types.h>
 #include "slog.h"
 
+bool leapYear(int year);
+bool nextYear(DATETIME* dateTime, int minutes);
+void addStar(char* s);
+
 FILE* otvoriDatoteku(char *filename);
 SLOG* pronadjiSlog(FILE *fajl, int sifraLeta);
 void dodajSlog(FILE *fajl, SLOG *slog);
@@ -16,5 +20,6 @@ void ispisiSveSlogove(FILE *fajl);
 void ispisiSlog(SLOG* slog);
 void obrisiSlogFizicki(FILE *fajl, int sifraLeta);
 void ispisBrzAvion(FILE* fajl);
+void dodavanjeZvezdice(FILE* fajl);
 
 #endif

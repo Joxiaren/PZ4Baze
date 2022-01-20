@@ -109,7 +109,7 @@ void ispisiSveSlogove(FILE* fajl)
 
     BLOK blok;
     int rbBloka = 0;
-    printf("BL SL SifraL Datum TipAviona Trajanje Udaljenost MestoDolaska\n");
+    printf("%2s %2s %8s %16s %7s %3s %4s %21s\n", "BL", "SL", "SifraL", "Datum", "TipAvio", "Trj", "Udlj", "MestoDolaska");
     fseek(fajl, 0, SEEK_SET);
     while(fread(&blok, sizeof(BLOK), 1, fajl))
     {
@@ -132,7 +132,7 @@ void ispisiSlog(SLOG* slog)
 {
 
     
-    printf("%08d %04d %02d %02d %02d %02d %7s %03d %04d %21s",
+    printf("%08d %04d-%02d-%02d %02d:%02d %7s %03d %04d %21s",
         slog->sifraLeta,
         slog->datum.year,
         slog->datum.month,
@@ -154,8 +154,7 @@ void obrisiSlogFizicki(FILE* fajl, int sifraLeta)
     }
 
     BLOK blok, naredniBlok;
-    int sifraLetaZaBrisanje = sifraLetaZaBrisanje;
-
+    
     fseek(fajl, 0, SEEK_SET);
     while(fread(&blok, 1, sizeof(BLOK), fajl))
     {
@@ -186,7 +185,7 @@ void obrisiSlogFizicki(FILE* fajl, int sifraLeta)
                 {
                     fseek(fajl, -sizeof(BLOK), SEEK_CUR);
                     memcpy(&(blok.slogovi[FBLOKIRANJA-1]), &(naredniBlok.slogovi[0]), sizeof(SLOG));
-                    naredniBlok.slogovi[0].sifraLeta = sifraLeta;
+                    sifraLeta = naredniBlok.slogovi[0].sifraLeta;
                 }
 
                 fseek(fajl, -sizeof(BLOK), SEEK_CUR);
@@ -212,7 +211,8 @@ void ispisBrzAvion(FILE* fajl)
     fseek(fajl, 0, SEEK_SET);
     while(fread(&blok, sizeof(BLOK), 1, fajl))
     {
-        for(int j = 0; j < FBLOKIRANJA; j++)
+        int j;
+        for(j = 0; j < FBLOKIRANJA; j++)
         {
             if(blok.slogovi[j].sifraLeta != OZNAKA_KRAJA_DATOTEKE)
             {
@@ -227,4 +227,67 @@ void ispisBrzAvion(FILE* fajl)
         }
     }
     printf("Najbrzi avion je: %s sa brzinom od %lf Km/h\n", avionTip, brzina*60);
+}
+void dodavanjeZvezdice(FILE* fajl)
+{
+    int count = 0;
+    BLOK blok;
+    fseek(fajl, 0, SEEK_SET);
+    while(fread(&blok, sizeof(BLOK), 1, fajl))
+    {
+        int j;
+        bool updateBlock = false;
+        for(j = 0; j < FBLOKIRANJA; j++)
+        {
+            if(blok.slogovi[j].sifraLeta == OZNAKA_KRAJA_DATOTEKE) break;
+			DATETIME dt;
+            memcpy(&dt, &blok.slogovi[j].datum, sizeof(DATETIME));
+            //TODO Optimize
+            if(blok.slogovi[j].datum.year == 2021 && nextYear(&dt, blok.slogovi[j].trajanjeLeta))
+			{
+				addStar(blok.slogovi[j].mestoDolaska);
+                ++count;
+                updateBlock = true;
+			}
+        }
+        if(updateBlock)
+        {
+            fseek(fajl, -sizeof(BLOK), SEEK_CUR);
+            fwrite(&blok, sizeof(BLOK), 1, fajl);
+        }
+    }
+    printf("Pronadjeno je %d leta koji prelaze iz 2021. u 2022. godinu\n", count);
+}
+bool leapYear(int year)
+{
+    if(year % 400 == 0) return true;
+    if(year % 100 == 0) return false;
+    if(year % 4 == 0) return true;
+    return false;
+}
+
+bool nextYear(DATETIME* dateTime, int minutes)
+{
+    //TODO Optimize
+    dateTime->minute += minutes;
+    dateTime->hour += (dateTime->minute / 60);
+    dateTime->day += (dateTime->hour / 24);
+    int numOfDays = 28;
+    int m = dateTime->month;
+    if(m == 1 || m == 3 || m == 5 || m == 7 || m == 8 || m == 10 || m == 12) numOfDays = 31;
+    else if(m == 4 || m == 6 || m == 9 || m == 11) numOfDays = 30;
+    else if(leapYear(dateTime->year)) numOfDays = 29;
+
+    if(dateTime->day > numOfDays) ++dateTime->month;
+
+    if(dateTime->month > 12) return true;
+    return false;
+}
+void addStar(char* s)
+{
+    int j = 0;
+	while(s[j] != '\0') ++j;
+    if(s[j-1] == '*') return; //star already exists
+    s[j] = '*';
+    s[j+1] = '\0';
 }
