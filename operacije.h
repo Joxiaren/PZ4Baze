@@ -15,5 +15,6 @@ void dodajSlog(FILE *fajl, SLOG *slog);
 void ispisiSveSlogove(FILE *fajl);
 void ispisiSlog(SLOG* slog);
 void obrisiSlogFizicki(FILE *fajl, int sifraLeta);
+void ispisBrzAvion(FILE* fajl);
 
 #endif

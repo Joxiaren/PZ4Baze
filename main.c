@@ -1,10 +1,14 @@
 #include "operacije.h"
 
-
-
-void strToDT(char* date, DATETIME* dateTime)
+void endStr(char* s)
 {
-    
+    int i = 0;
+    while(s[i] != '\n') ++i;
+    s[i] = '\0';
+}
+void cleanInput()
+{
+    while ((getchar()) != '\n'); 
 }
 
 int main()
@@ -43,12 +47,14 @@ int main()
             scanf("%s", fileName);
             
             fajl = otvoriDatoteku(fileName);
+            printf("\n");
         }
         else if(userInput == 2)
         {
             int sifraLeta;
             printf("Unesite sifru leta za pretragu: ");
             scanf("%d", &sifraLeta);
+            cleanInput();
             
             SLOG* slog = pronadjiSlog(fajl, sifraLeta);
             if(slog != NULL)
@@ -57,6 +63,70 @@ int main()
                 ispisiSlog(slog);
                 printf("\n");
             }
+            else printf("Dati slog nije pronadjen\n");
+        }
+        else if(userInput == 3)
+        {
+            SLOG slog;
+            printf("Unesite sifru leta: ");
+            scanf("%d", &slog.sifraLeta);
+
+            printf("Unesite datum (Format: 'YYYY-MM-DD HH:mm')");
+            scanf("%d-%d-%d %d:%d",
+                &slog.datum.year,
+                &slog.datum.month,
+                &slog.datum.day,
+                &slog.datum.hour,
+                &slog.datum.minute);
+
+
+            //TODO: Provjera datuma
+
+            printf("Unesite tip aviona (6 char max)");
+            scanf("%s", slog.tipAviona);
+
+            printf("Unesite trajanje leta (minute)");
+            scanf("%d", &slog.trajanjeLeta);
+            cleanInput();
+
+            printf("Unesite udaljenost leta (kilometri)");
+            scanf("%d", &slog.udaljenostLeta);
+            cleanInput();
+
+            printf("Unesite mesto dolaska (20 char max)");
+            scanf("%s", slog.mestoDolaska);
+
+            ispisiSlog(&slog);
+            printf("\n");
+            dodajSlog(fajl, &slog);
+            printf("\n");
+        }
+        else if(userInput == 4)
+        {
+            ispisiSveSlogove(fajl);
+            printf("\n");
+        }
+        else if(userInput == 5)
+        {
+            int sifraLeta;
+            printf("Unesite sifru leta za brisanje: ");
+            scanf("%d", &sifraLeta);
+            cleanInput();
+            obrisiSlogFizicki(fajl, sifraLeta);
+            printf("\n");
+        }
+        else if(userInput == 6) ispisBrzAvion(fajl);
+        else if(userInput == 7)
+        {
+
+        }
+        else if(userInput == 8)
+        {
+
+        }
+        else
+        {
+            printf("Los input!!\n");
         }
     }
     return 0;

@@ -1,20 +1,32 @@
 #include "operacije.h"
 
-FILE* otvoriDatoteku(char* filename)
+FILE* otvoriDatoteku(char* fileName)
 {
-    FILE* file = fopen(filename, "rb+");
+    FILE* file = fopen(fileName, "rb+");
     
-    if(file == NULL) printf("Fajl '%s' se ne moze otvoriti\n", filename);
-    else printf("Uspesno otvoren fajl '%s'\n", filename);
+    if(file == NULL) 
+    {
+        file = fopen(fileName, "wb+");
+        if(file == NULL) 
+        {
+            printf("Fajl '%s' ne postoji i ne moze se kreirati\n", fileName);
+            return NULL;
+        }
+        BLOK blok;
+        blok.slogovi[0].sifraLeta = OZNAKA_KRAJA_DATOTEKE;
+        fwrite(&blok, sizeof(BLOK), 1, file);
+
+        printf("Uspesno kreiran i otvoren fajl '%s'\n", fileName);
+    }
+    else printf("Uspesno otvoren fajl '%s'\n", fileName);
 
     return file;
 }
-
 SLOG* pronadjiSlog(FILE* fajl, int sifraLeta)
 {
     if(fajl == NULL) 
     {
-        printf("Dati slog nije pronadjen\n");
+        printf("Dati fajl nije pronadjen\n");
         return NULL;
     }
     fseek(fajl, 0, SEEK_SET);
@@ -118,9 +130,15 @@ void ispisiSveSlogove(FILE* fajl)
 }
 void ispisiSlog(SLOG* slog)
 {
-    printf("%08d %17s %7s %03d %04d %21s",
+
+    
+    printf("%08d %04d %02d %02d %02d %02d %7s %03d %04d %21s",
         slog->sifraLeta,
-        slog->datum,
+        slog->datum.year,
+        slog->datum.month,
+        slog->datum.day,
+        slog->datum.hour,
+        slog->datum.minute,
         slog->tipAviona,
         slog->trajanjeLeta,
         slog->udaljenostLeta,
@@ -182,8 +200,31 @@ void obrisiSlogFizicki(FILE* fajl, int sifraLeta)
                 }
                 break;
             }
-        }
-        
+        }   
     }
+}
+void ispisBrzAvion(FILE* fajl)
+{
+    char avionTip[7];
+    double brzina = 0.0;
 
+    BLOK blok;
+    fseek(fajl, 0, SEEK_SET);
+    while(fread(&blok, sizeof(BLOK), 1, fajl))
+    {
+        for(int j = 0; j < FBLOKIRANJA; j++)
+        {
+            if(blok.slogovi[j].sifraLeta != OZNAKA_KRAJA_DATOTEKE)
+            {
+                double thisBrzina = (double)blok.slogovi[j].udaljenostLeta / (double)blok.slogovi[j].trajanjeLeta;
+                if(thisBrzina > brzina)
+                {
+                    brzina = thisBrzina;
+                    strcpy(avionTip, blok.slogovi[j].tipAviona);
+                }
+            }
+            else break;
+        }
+    }
+    printf("Najbrzi avion je: %s sa brzinom od %lf Km/h\n", avionTip, brzina*60);
 }
